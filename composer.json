@@ -1,5 +1,5 @@
 {
-    "name": "esemve/hook",
+    "name": "mobi-market/hook",
     "description": "Simple hook engine for Laravel 5.8 to 8.x",
     "type": "library",
     "keywords": [
