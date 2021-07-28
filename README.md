@@ -1,5 +1,7 @@
 # Hook engine for Laravel
 
+> This is for legacy usage, to allow stuff to be upgraded to modern packages. This is going to be rewritten at some point to be more functional.
+
 **What is this?**
 
 The purpose of this project is that your packages could modify each other without overriding the source code.
@@ -23,24 +25,8 @@ Example 3: You save the users' data in a database. If you do it in a hook, you c
 # How do I install it?
 
 ```bash
-composer require esemve/hook
+composer require mobi-market/hook
 ```
-
-then to the app.php :
-```php
-...
-'providers' => [
-    ...
-    Esemve\Hook\HookServiceProvider::class,
-    ...
- ],
- 'aliases' =>[
-    ...
-    'Hook' => Esemve\Hook\Facades\Hook::class
-    ...
- ]
-```
-
 
 # How does it work?
 
@@ -48,7 +34,7 @@ Example:
 
 ```php
 $user = new User();
-$user = Hook::get('fillUser',[$user],function($user){
+$user = Hook::get('fillUser', [$user], function($user){
     return $user;
 });
 ```
@@ -61,7 +47,7 @@ Hook::listen('fillUser', function ($callback, $output, $user) {
     {
       $output = $user;
     }
-    $output->profilImage = ProfilImage::getForUser($user->id);
+    $output->profileImage = ProfileImage::getForUser($user->id);
     return $output;
 }, 10);
 
@@ -72,7 +58,7 @@ Multiple listeners could be registered to a hook, so in the $output the listener
 
 THen come the parameters delivered by the hook, in this case the user.
 
-The hook listener above caught the call of the fillUser, extended the received object, and returned it to its original place. After the run of the hook the $user object contains a profilImage variable as well.
+The hook listener above caught the call of the fillUser, extended the received object, and returned it to its original place. After the run of the hook the $user object contains a profileImage variable as well.
 
 Number 10 in the example is the priority. They are executed in an order, so if a number 5 is registered to the fillUser as well, it will run before number 10.
 
@@ -104,7 +90,7 @@ If there is no listeners, 'other string' will be returned.
 
 # Usage in blade templates
 
-```php
+```blade
 @hook('hookName')
 ```
 
@@ -119,7 +105,7 @@ In the $variables variable it receives all of the variables that are available f
 :exclamation: **To listen blade templates you need to listen `template.hookName` instead of just `hookName`!**
 
 # Wrap HTML
-```php
+```blade
 @hook('hookName', true)
     this content can be modified with dom parsers
     you can inject some html here
@@ -151,7 +137,7 @@ After that the hookName hook will return returnValue as a response.
 # Artisan
 
 ```bash
-php artisan hook::list
+php artisan hook:list
 ```
 
 Lists all the active hook listeners.

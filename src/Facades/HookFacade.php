@@ -2,12 +2,13 @@
 
 namespace Esemve\Hook\Facades;
 
+use Esemve\Hook\Hook;
 use Illuminate\Support\Facades\Facade;
 
-class Hook extends Facade
+class HookFacade extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'Hook';
+        return Hook::class;
     }
 }

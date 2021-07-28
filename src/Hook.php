@@ -6,24 +6,26 @@ use Illuminate\Support\Arr;
 
 class Hook
 {
+    /**
+     * @var array
+     */
     protected $watch = [];
-    protected $stop = [];
-    protected $mock = [];
+    protected $stop  = [];
+    protected $mock  = [];
+
+    /**
+     * @var bool
+     */
     protected $testing = false;
 
     /**
      * Return the hook answer.
      *
-     * @param string   $hook        Hook name
-     * @param array    $params
-     * @param callable $callback
-     * @param string   $htmlContent content wrapped by hook
-     *
-     * @return null|void
+     * @return mixed|null
      */
-    public function get($hook, $params = [], callable $callback = null, $htmlContent = '')
+    public function get(string $hook, array $params = [], ?callable $default = null, ?string $htmlContent = '')
     {
-        $callbackObject = $this->createCallbackObject($callback, $params);
+        $callbackObject = $this->createCallbackObject($default, $params);
 
         $output = $this->returnMockIfDebugModeAndMockExists($hook);
         if ($output) {
@@ -32,7 +34,7 @@ class Hook
 
         $output = $this->run($hook, $params, $callbackObject, $htmlContent);
 
-        if (!$output) {
+        if (null === $output && null !== $default) {
             $output = $callbackObject->call();
         }
 
@@ -43,10 +45,8 @@ class Hook
 
     /**
      * Stop all another hook running.
-     *
-     * @param string $hook Hook name
      */
-    public function stop($hook)
+    public function stop(string $hook): void
     {
         $this->stop[$hook] = true;
     }
@@ -54,16 +54,14 @@ class Hook
     /**
      * Subscribe to hook.
      *
-     * @param string $hook Hook name
-     * @param $priority
-     * @param $function
+     * @param int|float|null $priority
      */
-    public function listen($hook, $function, $priority = null)
+    public function listen(string $hook, callable $function, $priority = null): void
     {
-        $caller = debug_backtrace(null, 3)[2];
+        $caller = debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT, 3)[2];
 
         if (in_array(Arr::get($caller, 'function'), ['include', 'require'])) {
-            $caller = debug_backtrace(null, 4)[3];
+            $caller = debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT, 4)[3];
         }
 
         if (empty($this->watch[$hook])) {
@@ -83,7 +81,7 @@ class Hook
             ],
         ];
 
-        ksort($this->watch[$hook]);
+        \ksort($this->watch[$hook]);
     }
 
     /**
@@ -91,10 +89,10 @@ class Hook
      *
      * @return array
      */
-    public function getHooks()
+    public function getHooks(): array
     {
-        $hookNames = (array_keys($this->watch));
-        ksort($hookNames);
+        $hookNames = \array_keys($this->watch);
+        \ksort($hookNames);
 
         return $hookNames;
     }
@@ -106,7 +104,7 @@ class Hook
      *
      * @return array
      */
-    public function getEvents($hook)
+    public function getEvents($hook): array
     {
         $output = [];
 
@@ -120,10 +118,9 @@ class Hook
     /**
      * For testing.
      *
-     * @param string $name   Hook name
      * @param mixed  $return Answer
      */
-    public function mock($name, $return)
+    public function mock(string $name, $return): void
     {
         $this->testing = true;
         $this->mock[$name] = ['return' => $return];
@@ -132,11 +129,9 @@ class Hook
     /**
      * Return the mock value.
      *
-     * @param string $hook Hook name
-     *
      * @return null|mixed
      */
-    protected function returnMockIfDebugModeAndMockExists($hook)
+    protected function returnMockIfDebugModeAndMockExists(string $hook)
     {
         if ($this->testing) {
             if (array_key_exists($hook, $this->mock)) {
@@ -146,6 +141,8 @@ class Hook
                 return $output;
             }
         }
+
+        return null;
     }
 
     /**
@@ -156,7 +153,7 @@ class Hook
      *
      * @return \Esemve\Hook\Callback
      */
-    protected function createCallbackObject($callback, $params)
+    protected function createCallbackObject(callable $callback, array $params): Callback
     {
         return new Callback($callback, $params);
     }
@@ -164,27 +161,22 @@ class Hook
     /**
      * Run hook events.
      *
-     * @param string                $hook     Hook name
-     * @param array                 $params   Parameters
-     * @param \Esemve\Hook\Callback $callback Callback object
-     * @param string                $output   html wrapped by hook
-     *
      * @return mixed
      */
-    protected function run($hook, $params, Callback $callback, $output = null)
+    protected function run(string $hook, array $params, Callback $callback, ?string $output = null)
     {
-        array_unshift($params, $output);
-        array_unshift($params, $callback);
+        \array_unshift($params, $output);
+        \array_unshift($params, $callback);
 
-        if (array_key_exists($hook, $this->watch)) {
-            if (is_array($this->watch[$hook])) {
+        if (\array_key_exists($hook, $this->watch)) {
+            if (\is_array($this->watch[$hook])) {
                 foreach ($this->watch[$hook] as $function) {
                     if (!empty($this->stop[$hook])) {
                         unset($this->stop[$hook]);
                         break;
                     }
 
-                    $output = call_user_func_array($function['function'], $params);
+                    $output = \call_user_func_array($function['function'], $params);
                     $params[1] = $output;
                 }
             }
@@ -198,7 +190,7 @@ class Hook
      *
      * @return array
      */
-    public function getListeners()
+    public function getListeners(): array
     {
         return $this->watch;
     }
