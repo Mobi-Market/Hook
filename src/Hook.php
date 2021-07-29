@@ -21,9 +21,11 @@ class Hook
     /**
      * Return the hook answer.
      *
+     * @param mixed|null $initial
+     *
      * @return mixed|null
      */
-    public function get(string $hook, array $params = [], ?callable $default = null, ?string $htmlContent = '')
+    public function get(string $hook, array $params = [], ?callable $default = null, $initial = null)
     {
         $callbackObject = $this->createCallbackObject($default, $params);
 
@@ -32,7 +34,7 @@ class Hook
             return $output;
         }
 
-        $output = $this->run($hook, $params, $callbackObject, $htmlContent);
+        $output = $this->run($hook, $params, $callbackObject, $initial);
 
         if (null === $output && null !== $default) {
             $output = $callbackObject->call();
@@ -153,7 +155,7 @@ class Hook
      *
      * @return \Esemve\Hook\Callback
      */
-    protected function createCallbackObject(callable $callback, array $params): Callback
+    protected function createCallbackObject(?callable $callback, array $params): Callback
     {
         return new Callback($callback, $params);
     }
@@ -163,7 +165,7 @@ class Hook
      *
      * @return mixed
      */
-    protected function run(string $hook, array $params, Callback $callback, ?string $output = null)
+    protected function run(string $hook, array $params, Callback $callback, $output = null)
     {
         \array_unshift($params, $output);
         \array_unshift($params, $callback);
