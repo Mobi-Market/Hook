@@ -1,6 +1,6 @@
 {
     "name": "mobi-market/hook",
-    "description": "Simple hook engine for Laravel 5.8 to 8.x",
+    "description": "Simple hook engine for Laravel 5.8 to 9.x",
     "type": "library",
     "keywords": [
         "Hook",
@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "illuminate/support": ">=5.8 <9.0"
+        "illuminate/support": ">=5.8 <10.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0"
